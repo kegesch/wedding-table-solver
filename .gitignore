@@ -9,4 +9,4 @@ bun.lockb
 # Personal guest data generated from a private CSV.
 # Excluded for privacy — it contains real names and dietary needs.
 # Remove this line if your repo is private and you want it tracked.
-wedding.yaml
+#wedding.yaml

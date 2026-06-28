@@ -1,0 +1,241 @@
+---
+# Generated from C:/Users/mail/Downloads/guests_rows.csv by scripts/gen-from-csv.ts.
+# 63 guests, 34 relations (26 booking groups + wedding couple).
+# Weights: booking group = 8, wedding couple = 10.
+# Table layout is a default guess (8 round tables, 7-10 each) -- adjust to your venue.
+
+persons:
+  - id: richard_stromer
+    name: Richard Stromer
+  - id: johanna_klaus
+    name: Johanna Klaus
+  - id: ida_kuhn
+    name: Ida Kuhn
+  - id: marietta_otto
+    name: Marietta Otto
+  - id: bella_turner
+    name: Bella Turner
+  - id: lucas_hoffmann
+    name: Lucas Hoffmann
+  - id: annika_hinterberger
+    name: Annika Hinterberger
+  - id: raphael
+    name: Raphael
+  - id: olivia_keis
+    name: Olivia Keis
+  - id: ludwig_nagele
+    name: Ludwig Nägele
+  - id: nadine_brunner
+    name: Nadine Brunner
+  - id: stefan_klaus
+    name: Stefan Klaus
+  - id: julian_ro_le
+    name: Julian Rößle
+  - id: dariana_bing
+    name: Dariana Bing
+  - id: isabella_dumberger
+    name: Isabella Dumberger
+  - id: alois_mayr
+    name: Alois Mayr
+  - id: matthaus_kuhn
+    name: Matthäus Kuhn
+  - id: simon_brockhoff
+    name: Simon Brockhoff
+  - id: sophia_dyba
+    name: Sophia Dyba
+  - id: christopher_spiegel
+    name: Christopher Spiegel
+  - id: annika_kuisl
+    name: Annika Kuisl
+  - id: jonas_koch
+    name: Jonas Koch
+  - id: angela_afflerbach
+    name: Angela Afflerbach
+  - id: simone_stroh
+    name: Simone Stroh
+  - id: rene_wieland
+    name: Rene Wieland
+  - id: helen_kuhn
+    name: Helen Kuhn
+  - id: felix_bohn
+    name: Felix Bohn
+  - id: harald_geschke
+    name: Harald Geschke
+  - id: aneta_strzelecka
+    name: Aneta Strzelecka
+  - id: dom_otto
+    name: Dom Otto
+  - id: paniz_salrain
+    name: Paniz Salrain
+  - id: michael_brunner
+    name: Michael Brunner
+  - id: dennis_ostertag
+    name: Dennis Ostertag
+  - id: eleonora_geschke
+    name: Eleonora Geschke
+  - id: richard_grafenhorst
+    name: Richard Grafenhorst
+  - id: rouven_barra
+    name: Rouven Barra
+  - id: niklas_dyba
+    name: Niklas Dyba
+  - id: louisa_seelbach
+    name: Louisa Seelbach
+  - id: patrick_kuhn
+    name: Patrick Kuhn
+  - id: antonia_rothfelder
+    name: Antonia Rothfelder
+  - id: bea_eichinger
+    name: Bea Eichinger
+  - id: hannes_turner
+    name: Hannes Turner
+  - id: katrin_frey
+    name: Katrin Frey
+  - id: andrea_kuhn
+    name: Andrea Kuhn
+  - id: ronja_afflerbach
+    name: Ronja Afflerbach
+  - id: veronika_baumeister
+    name: Veronika Baumeister
+  - id: roberto_weiand
+    name: Roberto Weiand
+  - id: kathy_mayr
+    name: Kathy Mayr
+  - id: nici
+    name: Nici
+  - id: anna_brockhoff
+    name: Anna Brockhoff
+  - id: robin_seelbach
+    name: Robin Seelbach
+  - id: tobias_kutschker
+    name: Tobias Kutschker
+  - id: edmund_stroh
+    name: Edmund Stroh
+  - id: rudi_kuhn
+    name: Rudi Kuhn
+  - id: pauline_vogtle
+    name: Pauline Vögtle
+  - id: laura_kutschker
+    name: Laura Kutschker
+  - id: maximilian_betzinger
+    name: Maximilian Betzinger
+  - id: raphael_kuhn
+    name: Raphael Kuhn
+  - id: henning_afflerbach
+    name: Henning Afflerbach
+  - id: juliana_gai_mayer
+    name: Juliana Gaißmayer
+  - id: katharina_geck
+    name: Katharina Geck
+  - id: jonas_geschke
+    name: Jonas Geschke
+  - id: maria_kuhn
+    name: Maria Kuhn
+
+relations:
+  - between: [richard_stromer, bea_eichinger]
+    weight: 8
+  - between: [johanna_klaus, stefan_klaus]
+    weight: 8
+  - between: [marietta_otto, dom_otto]
+    weight: 8
+  - between: [bella_turner, hannes_turner]
+    weight: 8
+  - between: [lucas_hoffmann, pauline_vogtle]
+    weight: 8
+  - between: [annika_hinterberger, christopher_spiegel]
+    weight: 8
+  - between: [raphael, katrin_frey]
+    weight: 8
+  - between: [olivia_keis, helen_kuhn]
+    weight: 8
+  - between: [olivia_keis, patrick_kuhn]
+    weight: 8
+  - between: [olivia_keis, rudi_kuhn]
+    weight: 8
+  - between: [helen_kuhn, patrick_kuhn]
+    weight: 8
+  - between: [helen_kuhn, rudi_kuhn]
+    weight: 8
+  - between: [patrick_kuhn, rudi_kuhn]
+    weight: 8
+  - between: [ludwig_nagele, antonia_rothfelder]
+    weight: 8
+  - between: [nadine_brunner, michael_brunner]
+    weight: 8
+  - between: [julian_ro_le, veronika_baumeister]
+    weight: 8
+  - between: [dariana_bing, roberto_weiand]
+    weight: 8
+  - between: [isabella_dumberger, nici]
+    weight: 8
+  - between: [alois_mayr, kathy_mayr]
+    weight: 8
+  - between: [matthaus_kuhn, andrea_kuhn]
+    weight: 8
+  - between: [matthaus_kuhn, raphael_kuhn]
+    weight: 8
+  - between: [andrea_kuhn, raphael_kuhn]
+    weight: 8
+  - between: [simon_brockhoff, anna_brockhoff]
+    weight: 8
+  - between: [sophia_dyba, niklas_dyba]
+    weight: 8
+  - between: [annika_kuisl, richard_grafenhorst]
+    weight: 8
+  - between: [jonas_koch, aneta_strzelecka]
+    weight: 8
+  - between: [angela_afflerbach, henning_afflerbach]
+    weight: 8
+  - between: [simone_stroh, edmund_stroh]
+    weight: 8
+  - between: [rene_wieland, juliana_gai_mayer]
+    weight: 8
+  - between: [harald_geschke, eleonora_geschke]
+    weight: 8
+  - between: [louisa_seelbach, robin_seelbach]
+    weight: 8
+  - between: [tobias_kutschker, laura_kutschker]
+    weight: 8
+  - between: [maximilian_betzinger, katharina_geck]
+    weight: 8
+  - between: [jonas_geschke, maria_kuhn]
+    weight: 10
+
+tables:
+  - id: t1
+    name: Table 1
+    min: 7
+    max: 10
+  - id: t2
+    name: Table 2
+    min: 7
+    max: 10
+  - id: t3
+    name: Table 3
+    min: 7
+    max: 10
+  - id: t4
+    name: Table 4
+    min: 7
+    max: 10
+  - id: t5
+    name: Table 5
+    min: 7
+    max: 10
+  - id: t6
+    name: Table 6
+    min: 7
+    max: 10
+  - id: t7
+    name: Table 7
+    min: 7
+    max: 10
+  - id: t8
+    name: Table 8
+    min: 7
+    max: 10
+
+settings:
+  timeLimitSeconds: 60
+  gap: 0
