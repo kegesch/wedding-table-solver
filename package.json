@@ -1,0 +1,23 @@
+{
+  "name": "table-seat-planner",
+  "version": "0.1.0",
+  "description": "Optimal wedding seating planner: read persons, weighted relations, and tables from YAML, then find the optimum.",
+  "type": "module",
+  "bin": {
+    "seat-plan": "src/index.ts"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "csv-parse": "^7.0.0",
+    "glpk.js": "^5.0.0",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.6.3"
+  }
+}

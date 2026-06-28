@@ -1,0 +1,12 @@
+node_modules/
+bun.lockb
+*.log
+.DS_Store
+
+# Agent harness working data
+.pi/
+
+# Personal guest data generated from a private CSV.
+# Excluded for privacy — it contains real names and dietary needs.
+# Remove this line if your repo is private and you want it tracked.
+wedding.yaml
