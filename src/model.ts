@@ -26,6 +26,12 @@ export interface Table {
 	max: number;
 }
 
+/** A fixed table assignment - pre-allocated guests excluded from optimization. */
+export interface FixedTable {
+	tableId: string;
+	persons: string[]; // list of person IDs
+}
+
 /** Optional global solver settings, overridable per-invocation via CLI flags. */
 export interface Settings {
 	timeLimitSeconds?: number; // 0 or undefined => unlimited
@@ -38,6 +44,7 @@ export interface Problem {
 	relations: Relation[]; // deduplicated + aggregated, pairs sorted
 	tables: Table[];
 	settings: Settings;
+	fixedTables?: FixedTable[]; // optional pre-allocated tables (excluded from optimization)
 }
 
 /** One relation as realised by a particular seating. */
@@ -63,6 +70,7 @@ export interface Solution {
 	score: number; // realised objective value
 	upperBound: number; // sum of positive weights (an optimistic, possibly unreachable ceiling)
 	assignments: TableAssignment[];
+	fixedAssignments?: TableAssignment[]; // pre-allocated tables (excluded from optimization)
 	relations: RelationResult[];
 	unseated: Person[]; // always empty for a feasible problem (kept for safety)
 	timeSeconds: number;

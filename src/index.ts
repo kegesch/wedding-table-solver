@@ -26,10 +26,19 @@ program
 		"optimality gap tolerance as a fraction, e.g. 0.02 = 2%",
 		"0",
 	)
+	.option(
+		"--min-weight <weight>",
+		"minimum relation weight to include (relations with lower weight are ignored)",
+	)
 	.action(
 		async (
 			config: string,
-			opts: { debug: boolean; timeLimit: string; gap: string },
+			opts: {
+				debug: boolean;
+				timeLimit: string;
+				gap: string;
+				minWeight?: string;
+			},
 		) => {
 			let text: string;
 			try {
@@ -53,6 +62,24 @@ program
 			if (gap < 0 || gap >= 1)
 				fatal("--gap must be in [0, 1), e.g. 0.02 for 2%.");
 			if (timeLimit < 0) fatal("--time-limit must be >= 0.");
+
+			let minWeight: number | undefined;
+			if (opts.minWeight !== undefined) {
+				minWeight = parseNumber(opts.minWeight, "--min-weight");
+			}
+
+			// Filter relations by minimum weight if specified
+			if (minWeight !== undefined) {
+				const beforeCount = problem.relations.length;
+				problem.relations = problem.relations.filter(
+					(r) => r.weight >= minWeight!,
+				);
+				if (opts.debug && beforeCount !== problem.relations.length) {
+					console.error(
+						`[filter] Removed ${beforeCount - problem.relations.length} relations with weight < ${minWeight}`,
+					);
+				}
+			}
 
 			const solution = await solve(problem, {
 				timeLimitSeconds: timeLimit === 0 ? undefined : timeLimit,

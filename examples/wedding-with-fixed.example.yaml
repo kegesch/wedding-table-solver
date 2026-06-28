@@ -1,0 +1,155 @@
+---
+# Example wedding seating config with fixed tables for `seat-plan`.
+
+persons:
+  - id: alice
+    name: Alice
+    # bride
+  - id: bob
+    name: Bob
+    # groom
+  - id: carol
+    name: Carol
+    # Alice's mother
+  - id: dave
+    name: Dave
+    # Alice's father
+  - id: grace
+    name: Grace
+    # Alice's sister
+  - id: henry
+    name: Henry
+    # Grace's husband
+  - id: erin
+    name: Erin
+    # Bob's mother
+  - id: frank
+    name: Frank
+    # Bob's father
+  - id: ivan
+    name: Ivan
+    # Bob's brother
+  - id: julia
+    name: Julia
+    # Ivan's partner
+  - id: mia
+    name: Mia
+    # Alice's friend
+  - id: noah
+    name: Noah
+    # Bob's friend
+  - id: kate
+    name: Kate
+    # friend
+  - id: leo
+    name: Leo
+    # Kate's partner
+  - id: sam
+    name: Sam
+    # friend
+  - id: tara
+    name: Tara
+    # friend
+  - id: peter
+    name: Peter
+    # Alice's colleague
+  - id: mary
+    name: Mary
+    # Bob's colleague
+
+relations:
+  # couples
+  - between: [alice, bob]
+    weight: 10
+  - between: [grace, henry]
+    weight: 10
+  - between: [ivan, julia]
+    weight: 10
+  - between: [kate, leo]
+    weight: 10
+
+  # Alice's immediate family
+  - between: [alice, carol]
+    weight: 6
+  - between: [alice, dave]
+    weight: 6
+  - between: [carol, dave]
+    weight: 5
+  - between: [alice, grace]
+    weight: 5
+
+  # Bob's immediate family
+  - between: [bob, erin]
+    weight: 6
+  - between: [bob, frank]
+    weight: 6
+  - between: [erin, frank]
+    weight: 5
+  - between: [bob, ivan]
+    weight: 5
+
+  # friends
+  - between: [alice, mia]
+    weight: 3
+  - between: [alice, peter]
+    weight: 2
+  - between: [bob, noah]
+    weight: 3
+  - between: [bob, mary]
+    weight: 2
+  - between: [mia, kate]
+    weight: 2
+  - between: [noah, leo]
+    weight: 2
+  - between: [sam, tara]
+    weight: 8
+  - between: [peter, mary]
+    weight: 5
+
+  # awkward exes - keep apart
+  - between: [mia, noah]
+    weight: -8
+  - between: [peter, kate]
+    weight: -3
+
+tables:
+  - id: top
+    name: Top Table
+    min: 7
+    max: 9
+  - id: t1
+    name: Table 1
+    min: 7
+    max: 9
+  - id: t2
+    name: Table 2
+    min: 2
+    max: 4
+
+# Fixed tables - pre-allocated guests excluded from optimization
+fixedTables:
+  - tableId: top
+    persons:
+      - alice
+      - bob
+      - carol
+      - dave
+      - grace
+      - henry
+      - erin
+      - frank
+  - tableId: t1
+    persons:
+      - sam
+      - tara
+      - ivan
+      - julia
+      - kate
+      - leo
+      - mia
+      - noah
+  # Table 2 is left for optimization with remaining guests
+
+settings:
+  timeLimitSeconds: 30
+  gap: 0

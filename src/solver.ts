@@ -22,6 +22,7 @@ import type {
 	RelationResult,
 	Solution,
 	TableAssignment,
+	Person,
 } from "./model.js";
 
 export interface SolveOptions {
@@ -32,13 +33,131 @@ export interface SolveOptions {
 const xName = (pi: number, ti: number) => `x_${pi}_${ti}`;
 const zName = (ri: number, ti: number) => `z_${ri}_${ti}`;
 
+/** Split problem into fixed assignments and reduced problem for optimization. */
+function splitProblem(problem: Problem): {
+	fixedAssignments: TableAssignment[];
+	reducedProblem: Problem;
+	fixedPersonIds: Set<string>;
+	fixedTableIds: Set<string>;
+} {
+	const { persons, tables, relations, settings, fixedTables } = problem;
+
+	if (!fixedTables || fixedTables.length === 0) {
+		return {
+			fixedAssignments: [],
+			reducedProblem: problem,
+			fixedPersonIds: new Set(),
+			fixedTableIds: new Set(),
+		};
+	}
+
+	// Collect fixed person and table IDs
+	const fixedPersonIds = new Set<string>();
+	const fixedTableIds = new Set<string>();
+	fixedTables.forEach((ft) => {
+		fixedTableIds.add(ft.tableId);
+		ft.persons.forEach((pid) => fixedPersonIds.add(pid));
+	});
+
+	// Build fixed assignments
+	const fixedAssignments: TableAssignment[] = fixedTables
+		.map((ft) => {
+			const table = tables.find((t) => t.id === ft.tableId);
+			if (!table) return null;
+			return {
+				table,
+				persons: ft.persons
+					.map((pid) => persons.find((p) => p.id === pid))
+					.filter((p): p is Person => p !== undefined),
+			};
+		})
+		.filter((ta): ta is TableAssignment => ta !== null);
+
+	// Build reduced problem (only unfixed persons and unfixed tables)
+	const reducedPersons = persons.filter((p) => !fixedPersonIds.has(p.id));
+	const reducedTables = tables.filter((t) => !fixedTableIds.has(t.id));
+	const reducedRelations = relations.filter(
+		(r) => !fixedPersonIds.has(r.a) || !fixedPersonIds.has(r.b),
+	);
+
+	const reducedProblem: Problem = {
+		persons: reducedPersons,
+		relations: reducedRelations,
+		tables: reducedTables,
+		settings,
+	};
+
+	return {
+		fixedAssignments,
+		reducedProblem,
+		fixedPersonIds,
+		fixedTableIds,
+	};
+}
+
 /** Solve the problem to (near-)optimality. */
 export async function solve(
 	problem: Problem,
 	opts: SolveOptions = {},
 ): Promise<Solution> {
+	// Split problem into fixed and optimization parts
+	const { fixedAssignments, reducedProblem, fixedPersonIds } =
+		splitProblem(problem);
+
+	// If there are no tables or persons left to optimize, return early
+	if (
+		reducedProblem.tables.length === 0 ||
+		reducedProblem.persons.length === 0
+	) {
+		// Build a complete seating map from fixed assignments only
+		const seatOf = new Map<string, string>();
+		for (const assignment of fixedAssignments) {
+			for (const person of assignment.persons) {
+				seatOf.set(person.id, assignment.table.id);
+			}
+		}
+
+		// Realise each relation using the full problem's relations
+		const relResults: RelationResult[] = problem.relations.map((rel) => {
+			const ta = seatOf.get(rel.a);
+			const tb = seatOf.get(rel.b);
+			const together = ta !== undefined && ta === tb;
+			return {
+				a: rel.a,
+				b: rel.b,
+				weight: rel.weight,
+				together,
+				contribution: together ? rel.weight : 0,
+			};
+		});
+
+		const score = sum(relResults.map((r) => r.contribution));
+		const upperBound = sum(
+			problem.relations.filter((r) => r.weight > 0).map((r) => r.weight),
+		);
+
+		return {
+			statusText: "optimal (no optimization needed)",
+			optimal: true,
+			provenInfeasible: false,
+			score,
+			upperBound,
+			assignments: fixedAssignments,
+			fixedAssignments:
+				fixedAssignments.length > 0 ? fixedAssignments : undefined,
+			relations: relResults,
+			unseated: [],
+			timeSeconds: 0,
+			stats: {
+				variables: 0,
+				constraints: 0,
+				binaries: 0,
+			},
+		};
+	}
+
 	const glpk = await GLPK();
-	const { persons, relations, tables } = problem;
+	const { persons, relations, tables } = reducedProblem;
 
 	const personIndex = new Map<string, number>();
 	persons.forEach((p, i) => personIndex.set(p.id, i));
@@ -148,6 +267,9 @@ export async function solve(
 		variables: binaries.length,
 		constraints: subjectTo.length,
 		binaries: binaries.length,
+		fixedAssignments,
+		reducedProblem,
+		fixedPersonIds,
 	});
 }
 
@@ -155,6 +277,9 @@ interface Stats {
 	variables: number;
 	constraints: number;
 	binaries: number;
+	fixedAssignments: TableAssignment[];
+	reducedProblem: Problem;
+	fixedPersonIds: Set<string>;
 }
 
 function decode(
@@ -179,33 +304,56 @@ function decode(
 	else statusText = `unknown (status code ${status})`;
 
 	const vars = res.result.vars ?? {};
-	const { persons, relations, tables } = problem;
+	const { persons, tables } = stats.reducedProblem;
+	const { fixedAssignments } = stats;
 
-	// Determine each person's table.
-	const seatOf = new Map<string, number>(); // personId -> table index
+	// Build a complete seating map including fixed assignments
+	const seatOf = new Map<string, string>(); // personId -> tableId
+
+	// Add fixed assignments
+	for (const assignment of fixedAssignments) {
+		for (const person of assignment.persons) {
+			seatOf.set(person.id, assignment.table.id);
+		}
+	}
+
+	// Determine each person's table from the optimization result
 	for (let pi = 0; pi < persons.length; pi++) {
 		for (let ti = 0; ti < tables.length; ti++) {
 			if ((vars[xName(pi, ti)] ?? 0) > 0.5) {
-				seatOf.set(persons[pi]!.id, ti);
+				seatOf.set(persons[pi]!.id, tables[ti]!.id);
 				break;
 			}
 		}
 	}
 
-	// Group people by table.
-	const assignments: TableAssignment[] = tables.map((table) => ({
+	// Group people by table for the output
+	const optimizedAssignments: TableAssignment[] = tables.map((table) => ({
 		table,
 		persons: [],
 	}));
-	const unseated: typeof persons = [];
+
 	for (const p of persons) {
-		const ti = seatOf.get(p.id);
-		if (ti === undefined) unseated.push(p);
-		else assignments[ti]!.persons.push(p);
+		const tableId = seatOf.get(p.id);
+		if (!tableId) continue;
+		const assignment = optimizedAssignments.find((a) => a.table.id === tableId);
+		if (assignment) assignment.persons.push(p);
 	}
 
-	// Realise each relation.
-	const relResults: RelationResult[] = relations.map((rel) => {
+	// Build the complete assignments list (fixed first, then optimized)
+	const allAssignments: TableAssignment[] = [
+		...fixedAssignments,
+		...optimizedAssignments,
+	];
+
+	// Check for unseated persons (shouldn't happen in a valid solution)
+	const unseated: typeof problem.persons = [];
+	for (const p of problem.persons) {
+		if (!seatOf.has(p.id)) unseated.push(p);
+	}
+
+	// Realise each relation using the full problem's relations
+	const relResults: RelationResult[] = problem.relations.map((rel) => {
 		const ta = seatOf.get(rel.a);
 		const tb = seatOf.get(rel.b);
 		const together = ta !== undefined && ta === tb;
@@ -224,7 +372,7 @@ function decode(
 			? res.result.z
 			: sum(relResults.map((r) => r.contribution));
 	const upperBound = sum(
-		relations.filter((r) => r.weight > 0).map((r) => r.weight),
+		problem.relations.filter((r) => r.weight > 0).map((r) => r.weight),
 	);
 
 	return {
@@ -233,11 +381,17 @@ function decode(
 		provenInfeasible,
 		score,
 		upperBound,
-		assignments,
+		assignments: allAssignments,
+		fixedAssignments:
+			fixedAssignments.length > 0 ? fixedAssignments : undefined,
 		relations: relResults,
 		unseated,
 		timeSeconds: res.time ?? 0,
-		stats,
+		stats: {
+			variables: stats.variables,
+			constraints: stats.constraints,
+			binaries: stats.binaries,
+		},
 	};
 }
 

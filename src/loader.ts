@@ -1,6 +1,13 @@
 // Parse and validate the YAML config into a fully-checked Problem.
 import { parse } from "yaml";
-import type { Person, Problem, Relation, Settings, Table } from "./model.js";
+import type {
+	Person,
+	Problem,
+	Relation,
+	Settings,
+	Table,
+	FixedTable,
+} from "./model.js";
 
 /** Thrown when the config is structurally invalid or infeasible by inspection. */
 export class ConfigError extends Error {}
@@ -102,6 +109,69 @@ export function loadProblem(text: string): Problem {
 		});
 	}
 
+	// --- fixedTables (optional) ---
+	const fixedTables: FixedTable[] = [];
+	const fixedTablesRaw = doc["fixedTables"];
+	if (fixedTablesRaw !== undefined) {
+		if (!Array.isArray(fixedTablesRaw)) {
+			errors.push('"fixedTables" must be a list when present.');
+		} else {
+			const assignedFixedPersons = new Set<string>();
+			fixedTablesRaw.forEach((ft, i) => {
+				tryPush(() => {
+					if (!isObj(ft))
+						throw new ConfigError(`fixedTables[${i}]: must be a mapping.`);
+					const tableId = asStr(ft["tableId"], `fixedTables[${i}].tableId`);
+					if (!tableIds.has(tableId))
+						throw new ConfigError(
+							`fixedTables[${i}]: unknown table "${tableId}".`,
+						);
+					const personsRaw = ft["persons"];
+					if (!Array.isArray(personsRaw) || personsRaw.length === 0) {
+						throw new ConfigError(
+							`fixedTables[${i}].persons: must be a non-empty list.`,
+						);
+					}
+					const personIdsList: string[] = [];
+					personsRaw.forEach((pid, j) => {
+						if (typeof pid !== "string") {
+							throw new ConfigError(
+								`fixedTables[${i}].persons[${j}]: must be a string.`,
+							);
+						}
+						if (!personIds.has(pid)) {
+							throw new ConfigError(
+								`fixedTables[${i}].persons[${j}]: unknown person "${pid}".`,
+							);
+						}
+						if (assignedFixedPersons.has(pid)) {
+							throw new ConfigError(
+								`fixedTables[${i}].persons[${j}]: person "${pid}" is already assigned to another fixed table.`,
+							);
+						}
+						assignedFixedPersons.add(pid);
+						personIdsList.push(pid);
+					});
+
+					// Validate capacity constraints for fixed tables
+					const table = tables.find((t) => t.id === tableId)!;
+					if (personIdsList.length > table.max) {
+						throw new ConfigError(
+							`fixedTables[${i}]: ${personIdsList.length} persons assigned to table "${tableId}" but max is ${table.max}.`,
+						);
+					}
+					if (personIdsList.length < table.min) {
+						throw new ConfigError(
+							`fixedTables[${i}]: ${personIdsList.length} persons assigned to table "${tableId}" but min is ${table.min}.`,
+						);
+					}
+
+					fixedTables.push({ tableId, persons: personIdsList });
+				});
+			});
+		}
+	}
+
 	// --- relations (optional) ---
 	const relations: Relation[] = [];
 	const relKey = (a: string, b: string) =>
@@ -176,22 +246,39 @@ export function loadProblem(text: string): Problem {
 	}
 
 	// --- feasibility by inspection ---
+	// Account for fixed tables: only the non-fixed people need to fit into the
+	// non-fixed tables. Fixed tables are already filled to an exact (validated)
+	// count, so they neither absorb free people nor impose min/max on the rest.
 	if (persons.length > 0 && tables.length > 0) {
-		const totalMin = tables.reduce((s, t) => s + t.min, 0);
-		const totalMax = tables.reduce((s, t) => s + t.max, 0);
-		if (persons.length > totalMax)
+		const fixedTableIdSet = new Set(fixedTables.map((ft) => ft.tableId));
+		const fixedPersonCount = fixedTables.reduce(
+			(s, ft) => s + ft.persons.length,
+			0,
+		);
+		const freePersons = persons.length - fixedPersonCount;
+		const freeTables = tables.filter((t) => !fixedTableIdSet.has(t.id));
+
+		if (freePersons > 0 && freeTables.length === 0) {
 			errors.push(
-				`Infeasible: ${persons.length} people but only ${totalMax} total seats (sum of table max).`,
+				`Infeasible: ${freePersons} unassigned people but every table is fixed (add a free table or free a fixed one).`,
 			);
-		if (persons.length < totalMin)
-			errors.push(
-				`Infeasible: ${persons.length} people but tables require at least ${totalMin} seats (sum of table min).`,
-			);
+		} else if (freeTables.length > 0) {
+			const totalMin = freeTables.reduce((s, t) => s + t.min, 0);
+			const totalMax = freeTables.reduce((s, t) => s + t.max, 0);
+			if (freePersons > totalMax)
+				errors.push(
+					`Infeasible: ${freePersons} unassigned people but only ${totalMax} free seats (sum of non-fixed table max).`,
+				);
+			if (freePersons < totalMin)
+				errors.push(
+					`Infeasible: ${freePersons} unassigned people but free tables require at least ${totalMin} seats (sum of non-fixed table min). Lower some table.min, or move people off fixed tables.`,
+				);
+		}
 	}
 
 	if (errors.length > 0) {
 		throw new ConfigError("Invalid config:\n  - " + errors.join("\n  - "));
 	}
 
-	return { persons, relations, tables, settings };
+	return { persons, relations, tables, settings, fixedTables };
 }

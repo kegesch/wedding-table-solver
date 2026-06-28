@@ -134,71 +134,171 @@ persons:
 
 relations:
   - between: [richard_stromer, bea_eichinger]
-    weight: 8
+    weight: 10
+  - between: [richard_stromer, christopher_spiegel]
+    weight: 7
+  - between: [richard_stromer, dennis_ostertag]
+    weight: 6
+  - between: [richard_stromer, robin_seelbach]
+    weight: 3
   - between: [johanna_klaus, stefan_klaus]
-    weight: 8
+    weight: 10
+  - between: [stefan_klaus, michael_brunner]
+    weight: 7
+  - between: [stefan_klaus, felix_bohn]
+    weight: 7
   - between: [marietta_otto, dom_otto]
-    weight: 8
+    weight: 10
+  - between: [marietta_otto, sophia_dyba]
+    weight: 7
+  - between: [dom_otto, niklas_dyba]
+    weight: 7
   - between: [bella_turner, hannes_turner]
-    weight: 8
+    weight: 10
+  - between: [bella_turner, veronika_baumeister]
+    weight: 6
+  - between: [bella_turner, simone_stroh]
+    weight: 7
   - between: [lucas_hoffmann, pauline_vogtle]
+    weight: 10
+  - between: [rouven_barra, pauline_vogtle]
+    weight: 7
+  - between: [lucas_hoffmann, ludwig_nagele]
     weight: 8
   - between: [annika_hinterberger, christopher_spiegel]
-    weight: 8
+    weight: 10
   - between: [raphael, katrin_frey]
-    weight: 8
+    weight: 10
+  - between: [katrin_frey, isabella_dumberger]
+    weight: 10
   - between: [olivia_keis, helen_kuhn]
-    weight: 8
+    weight: 4
   - between: [olivia_keis, patrick_kuhn]
-    weight: 8
+    weight: 10
   - between: [olivia_keis, rudi_kuhn]
-    weight: 8
+    weight: 4
   - between: [helen_kuhn, patrick_kuhn]
-    weight: 8
+    weight: 4
   - between: [helen_kuhn, rudi_kuhn]
-    weight: 8
+    weight: 10
   - between: [patrick_kuhn, rudi_kuhn]
-    weight: 8
+    weight: 4
+  - between: [patrick_kuhn, raphael_kuhn]
+    weight: 6
   - between: [ludwig_nagele, antonia_rothfelder]
-    weight: 8
+    weight: 10
+  - between: [ludwig_nagele, stefan_klaus]
+    weight: 5
   - between: [nadine_brunner, michael_brunner]
-    weight: 8
+    weight: 10
+  - between: [michael_brunner, ludwig_nagele]
+    weight: 2
   - between: [julian_ro_le, veronika_baumeister]
-    weight: 8
+    weight: 10
   - between: [dariana_bing, roberto_weiand]
-    weight: 8
+    weight: 10
+  - between: [dariana_bing, jonas_koch]
+    weight: 7
   - between: [isabella_dumberger, nici]
-    weight: 8
+    weight: 10
   - between: [alois_mayr, kathy_mayr]
-    weight: 8
+    weight: 10
+  - between: [helen_kuhn, kathy_mayr]
+    weight: 7
+  - between: [rudi_kuhn, alois_mayr]
+    weight: 7
+  - between: [ida_kuhn, kathy_mayr]
+    weight: 6
+  - between: [matthaus_kuhn, kathy_mayr]
+    weight: 5
   - between: [matthaus_kuhn, andrea_kuhn]
-    weight: 8
+    weight: 10
   - between: [matthaus_kuhn, raphael_kuhn]
-    weight: 8
+    weight: 4
+  - between: [matthaus_kuhn, rudi_kuhn]
+    weight: 7
+  - between: [matthaus_kuhn, ida_kuhn]
+    weight: 7
   - between: [andrea_kuhn, raphael_kuhn]
-    weight: 8
+    weight: 10
   - between: [simon_brockhoff, anna_brockhoff]
-    weight: 8
+    weight: 10
+  - between: [anna_brockhoff, sophia_dyba]
+    weight: 5
+  - between: [anna_brockhoff, marietta_otto]
+    weight: 3
+  - between: [simon_brockhoff, lucas_hoffmann]
+    weight: 5
   - between: [sophia_dyba, niklas_dyba]
-    weight: 8
+    weight: 10
   - between: [annika_kuisl, richard_grafenhorst]
-    weight: 8
+    weight: 10
+  - between: [annika_kuisl, annika_hinterberger]
+    weight: 6
   - between: [jonas_koch, aneta_strzelecka]
-    weight: 8
+    weight: 10
   - between: [angela_afflerbach, henning_afflerbach]
-    weight: 8
+    weight: 10
+  - between: [angela_afflerbach, harald_geschke]
+    weight: 6
   - between: [simone_stroh, edmund_stroh]
-    weight: 8
+    weight: 10
+  - between: [simone_stroh, veronika_baumeister]
+    weight: 7
+  - between: [simone_stroh, dariana_bing]
+    weight: 7
   - between: [rene_wieland, juliana_gai_mayer]
-    weight: 8
+    weight: 10
+  - between: [paniz_salrain, juliana_gai_mayer]
+    weight: 7
+  - between: [isabella_dumberger, juliana_gai_mayer]
+    weight: 7
   - between: [harald_geschke, eleonora_geschke]
-    weight: 8
+    weight: 10
+  - between: [harald_geschke, laura_kutschker]
+    weight: 7
+  - between: [eleonora_geschke, laura_kutschker]
+    weight: 7
   - between: [louisa_seelbach, robin_seelbach]
-    weight: 8
+    weight: 10
   - between: [tobias_kutschker, laura_kutschker]
-    weight: 8
+    weight: 10
   - between: [maximilian_betzinger, katharina_geck]
-    weight: 8
+    weight: 10
+  - between: [maximilian_betzinger, robin_seelbach]
+    weight: 7
+  - between: [maximilian_betzinger, christopher_spiegel]
+    weight: 5
+  - between: [robin_seelbach, christopher_spiegel]
+    weight: 5
+  - between: [robin_seelbach, dennis_ostertag]
+    weight: 1
+  - between: [maximilian_betzinger, dennis_ostertag]
+    weight: 1
+  - between: [felix_bohn, ludwig_nagele]
+    weight: 4
+  - between: [felix_bohn, michael_brunner]
+    weight: 6
+  - between: [felix_bohn, dennis_ostertag]
+    weight: 7
+  - between: [dennis_ostertag, rouven_barra]
+    weight: 3
+  - between: [dennis_ostertag, ludwig_nagele]
+    weight: 5
+  - between: [richard_grafenhorst, rouven_barra]
+    weight: 6
+  - between: [ronja_afflerbach, henning_afflerbach]
+    weight: 4
+  - between: [ronja_afflerbach, laura_kutschker]
+    weight: 4
+  - between: [ronja_afflerbach, angela_afflerbach]
+    weight: 4
+  - between: [ronja_afflerbach, robin_seelbach]
+    weight: 4
+  - between: [ronja_afflerbach, bea_eichinger]
+    weight: 4
+  - between: [ronja_afflerbach, katharina_geck]
+    weight: 4
   - between: [jonas_geschke, maria_kuhn]
     weight: 10
 
@@ -225,16 +325,66 @@ tables:
     max: 10
   - id: t6
     name: Table 6
-    min: 7
+    min: 8
     max: 10
   - id: t7
     name: Table 7
-    min: 7
+    min: 8
     max: 10
   - id: t8
     name: Table 8
-    min: 7
+    min: 4
     max: 10
+
+fixedTables:
+  - tableId: t4
+    persons:
+      - angela_afflerbach
+      - henning_afflerbach
+      - ronja_afflerbach
+      - laura_kutschker
+      - tobias_kutschker
+      - eleonora_geschke
+      - harald_geschke
+  - tableId: t5
+    persons:
+      - raphael
+      - isabella_dumberger
+      - rene_wieland
+      - paniz_salrain
+      - katrin_frey
+      - nici
+      - juliana_gai_mayer
+  - tableId: t6
+    persons:
+      - jonas_koch
+      - aneta_strzelecka
+      - roberto_weiand
+      - dariana_bing
+      - edmund_stroh
+      - simone_stroh
+      - veronika_baumeister
+      - julian_ro_le
+      - bella_turner
+      - hannes_turner
+  - tableId: t7
+    persons:
+      - patrick_kuhn
+      - olivia_keis
+      - helen_kuhn
+      - rudi_kuhn
+      - kathy_mayr
+      - alois_mayr
+      - matthaus_kuhn
+      - andrea_kuhn
+      - ida_kuhn
+      - raphael_kuhn
+  - tableId: t8
+    persons:
+      - jonas_geschke
+      - maria_kuhn
+      - niklas_dyba
+      - sophia_dyba
 
 settings:
   timeLimitSeconds: 60

@@ -20,17 +20,26 @@ export function formatSolution(problem: Problem, sol: Solution): string {
 	const scoreStr = sol.optimal
 		? bold(green(String(sol.score)))
 		: bold(yellow(String(sol.score)));
+	const fixedCount = sol.fixedAssignments?.length ?? 0;
+	const fixedPersonCount =
+		sol.fixedAssignments?.reduce((sum, ta) => sum + ta.persons.length, 0) ?? 0;
+	const optimizedCount = sol.assignments.length - fixedCount;
+
 	lines.push(
 		`${bold("Seating plan")} — score ${scoreStr} (${sol.statusText})`,
-		`${problem.persons.length} people at ${problem.tables.length} tables · solved in ${sol.timeSeconds.toFixed(2)}s`,
+		`${problem.persons.length} people at ${problem.tables.length} tables (${fixedPersonCount} fixed, ${fixedCount} fixed tables, ${optimizedCount} optimized tables) · solved in ${sol.timeSeconds.toFixed(2)}s`,
 		"",
 	);
 
 	for (const a of sol.assignments) {
 		const { table } = a;
+		const isFixed = sol.fixedAssignments?.some(
+			(fa) => fa.table.id === table.id,
+		);
 		const names = a.persons.map((p) => p.name).join(", ") || dim("(empty)");
+		const prefix = isFixed ? yellow("[FIXED]") : "";
 		lines.push(
-			`${bold(table.name)} ${dim(`(${a.persons.length}/${table.max} seated, capacity ${table.min}–${table.max})`)}`,
+			`${prefix} ${bold(table.name)} ${dim(`(${a.persons.length}/${table.max} seated, capacity ${table.min}–${table.max})`)}`,
 			`  ${names}`,
 			"",
 		);
@@ -63,13 +72,14 @@ export function formatDebug(problem: Problem, sol: Solution): string {
 		`relations: ${problem.relations.length} (${problem.relations.filter((r) => r.weight > 0).length} affinity, ${problem.relations.filter((r) => r.weight < 0).length} aversion)`,
 		`tables:    ${problem.tables.length} (seats ${tableSeatRange(problem)})`,
 	);
-	const totalMin = problem.tables.reduce((s, t) => s + t.min, 0);
-	const totalMax = problem.tables.reduce((s, t) => s + t.max, 0);
+	const cap = reducedCapacity(problem);
+	const fits = cap.freePersons >= cap.freeMin && cap.freePersons <= cap.freeMax;
+	const capLabel = cap.hasFixed
+		? `${cap.freePersons} unassigned people vs ${cap.freeMin}–${cap.freeMax} free seats`
+		: `${problem.persons.length} people vs ${cap.freeMin}–${cap.freeMax} total seats`;
 	lines.push(
-		`capacity:  ${problem.persons.length} people vs ${totalMin}–${totalMax} total seats ` +
-			(problem.persons.length >= totalMin && problem.persons.length <= totalMax
-				? green("[fits]")
-				: red("[does not fit]")),
+		`capacity:  ${capLabel} ` +
+			(fits ? green("[fits]") : red("[does not fit]")),
 	);
 	if (sol.stats) {
 		lines.push(
@@ -150,18 +160,43 @@ function tableSeatRange(problem: Problem): string {
 	return problem.tables.map((t) => `${t.min}-${t.max}`).join(", ");
 }
 
+/** People/tables that still need to be optimised (fixed tables excluded). */
+function reducedCapacity(problem: Problem): {
+	freePersons: number;
+	freeMin: number;
+	freeMax: number;
+	hasFixed: boolean;
+} {
+	const fixedPersonIds = new Set<string>();
+	const fixedTableIds = new Set<string>();
+	for (const ft of problem.fixedTables ?? []) {
+		fixedTableIds.add(ft.tableId);
+		for (const p of ft.persons) fixedPersonIds.add(p);
+	}
+	const freePersons = problem.persons.filter(
+		(p) => !fixedPersonIds.has(p.id),
+	).length;
+	const freeTables = problem.tables.filter((t) => !fixedTableIds.has(t.id));
+	return {
+		freePersons,
+		freeMin: freeTables.reduce((s, t) => s + t.min, 0),
+		freeMax: freeTables.reduce((s, t) => s + t.max, 0),
+		hasFixed: fixedPersonIds.size > 0,
+	};
+}
+
 function explainInfeasible(problem: Problem): string {
-	const totalMin = problem.tables.reduce((s, t) => s + t.min, 0);
-	const totalMax = problem.tables.reduce((s, t) => s + t.max, 0);
-	const n = problem.persons.length;
+	// Reason about the reduced problem (fixed tables excluded), since those are
+	// what actually drove the optimiser/solver to infeasibility.
+	const { freePersons, freeMin, freeMax, hasFixed } = reducedCapacity(problem);
 	const reasons: string[] = [];
-	if (n > totalMax)
+	if (freePersons > freeMax)
 		reasons.push(
-			`${n} people but only ${totalMax} total seats (raise some table.max).`,
+			`${freePersons} unassigned people but only ${freeMax} free seats${hasFixed ? " (non-fixed tables)" : ""}. Raise some table.max${hasFixed ? " or free a fixed table" : ""}.`,
 		);
-	if (n < totalMin)
+	if (freePersons < freeMin)
 		reasons.push(
-			`Tables require at least ${totalMin} seats but there are only ${n} people (lower some table.min).`,
+			`${hasFixed ? "Free tables" : "Tables"} require at least ${freeMin} seats but there are only ${freePersons} ${hasFixed ? "unassigned" : ""} people${hasFixed ? "" : ""}. Lower some table.min${hasFixed ? " or move people off fixed tables" : ""}.`,
 		);
 	return reasons.length
 		? "Why:\n  - " + reasons.join("\n  - ")

@@ -21,7 +21,7 @@ bun run src/index.ts examples/wedding.example.yaml --debug
 
 ## Config format
 
-The config is a YAML file with four sections (`settings` is optional):
+The config is a YAML file with five sections (`settings` and `fixedTables` are optional):
 
 ```yaml
 persons:          # every guest; `id` is the handle used in relations
@@ -42,6 +42,13 @@ tables:           # each table needs a max; min defaults to 0
     min: 6
     max: 8
 
+fixedTables:      # optional; pre-allocate guests to tables (excluded from optimization)
+  - tableId: top
+    persons:
+      - alice
+      - bob
+      - carol
+
 settings:         # optional; overridable by CLI flags
   timeLimitSeconds: 30
   gap: 0
@@ -57,6 +64,34 @@ Only the relative scale of the weights matters. Relations are undirected, so
 `between: [alice, bob]` and `between: [bob, alice]` are the same (listing both
 adds the weights). The objective the solver maximises is the sum of weights over
 pairs that end up at the same table.
+
+### Fixed tables
+
+The `fixedTables` section allows you to pre-allocate guests to specific tables.
+These guests and tables are excluded from the optimization, which is useful when:
+
+- Some tables are already assigned (e.g., head table, family tables)
+- You want to manually control certain assignments while optimizing the rest
+- Running incremental optimizations after manual adjustments
+
+**Rules for fixed tables:**
+- All person IDs must exist in the `persons` section
+- All table IDs must exist in the `tables` section
+- Each person can only be assigned to one fixed table (no duplicates)
+- Fixed table assignments must respect each table's `min` and `max` capacity
+
+**Example:**
+```yaml
+fixedTables:
+  - tableId: head
+    persons: [bride, groom, parents, family_member1, family_member2]
+  - tableId: family_a
+    persons: [uncle1, aunt1, cousin1, cousin2]
+```
+
+The solver will only optimize seating for guests not listed in `fixedTables`,
+and only use tables not referenced in `fixedTables`. Relations involving fixed
+guests are still evaluated in the final score, but not used for optimization decisions.
 
 ## CLI options
 
